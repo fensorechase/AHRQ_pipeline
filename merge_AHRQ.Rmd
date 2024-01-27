@@ -1,0 +1,122 @@
+---
+title: "merge_AHRQ"
+output: html_notebook
+---
+
+# Load libraries
+```{r}
+library(caret)
+library(data.table)
+library(dplyr)
+library(sets)
+library(scales)
+library(tidyr)
+library(stringr)
+```
+
+# Load patient data:
+```{r}
+# Import (synthetic) patient dataset
+df_patients <- read.csv("../Data/fake_patient_data.csv", header = TRUE)
+
+head(df_patients)
+```
+
+# Load ZIP code level AHRQ SDOHD Data
+```{r}
+# Import AHRQ data
+zip_ahrq_df_2011 <- read.csv("../Data/AHRQ/ZIP/sdoh_2011_ZIPCODE_1_0.csv")
+zip_ahrq_df_2012 <- read.csv("../Data/AHRQ/ZIP/sdoh_2012_ZIPCODE_1_0.csv") # header=FALSE
+zip_ahrq_df_2013 <- read.csv("../Data/AHRQ/ZIP/sdoh_2013_ZIPCODE_1_0.csv") # header=FALSE
+zip_ahrq_df_2014 <- read.csv("../Data/AHRQ/ZIP/sdoh_2014_ZIPCODE_1_0.csv") # header=FALSE
+zip_ahrq_df_2015 <- read.csv("../Data/AHRQ/ZIP/sdoh_2015_ZIPCODE_1_0.csv") # header=FALSE
+zip_ahrq_df_2016 <- read.csv("../Data/AHRQ/ZIP/sdoh_2016_ZIPCODE_1_0.csv") # header=FALSE
+zip_ahrq_df_2017 <- read.csv("../Data/AHRQ/ZIP/sdoh_2017_ZIPCODE_1_0.csv") # header=FALSE
+zip_ahrq_df_2018 <- read.csv("../Data/AHRQ/ZIP/sdoh_2018_ZIPCODE_1_0.csv") # header=FALSE
+zip_ahrq_df_2019 <- read.csv("../Data/AHRQ/ZIP/sdoh_2019_ZIPCODE_1_0.csv") # header=FALSE
+zip_ahrq_df_2020 <- read.csv("../Data/AHRQ/ZIP/sdoh_2020_ZIPCODE_1_0.csv") # header=FALSE
+
+
+# Use fill to ensured consistent number of columns, merge dfs from 2009-2020 (via mean).
+# Merge dfs on the 6 items below in list.
+zip_ahrq_total <- rbindlist(list(zip_ahrq_df_2011, zip_ahrq_df_2012, zip_ahrq_df_2013,
+                             zip_ahrq_df_2014, zip_ahrq_df_2015, zip_ahrq_df_2016, zip_ahrq_df_2017, zip_ahrq_df_2018,
+                             zip_ahrq_df_2019, zip_ahrq_df_2020), fill=TRUE)
+```
+
+
+# AHRQ SDOH Feature names: at the ZIP code level. 
+- this file has the *union* of all feature names from 2011-2020. 
+- For each variable, this file contains: 
+    - Variable_name: unique variable identifier
+      - Variable_name_no_ZC_suffix: the Variable_name field without the suffix "ZC" for zip code.
+    - Data_source: the data source, 
+    - Domain: SDOH domain, 
+    - SDOH_topic: more specific category than the domain,
+    - Variable_Label: short written explanation of the variable.
+    
+## Note: 
+- variables with 'NA' for a field simply describe the geography -- they are to be used for merging with patient data (below), not as SDOH variables.
+```{r}
+
+zip_ahrq_feat_names <- read.csv("../Data/AHRQ/ZIP/zip_ahrq_feat_names.csv")
+print(zip_ahrq_feat_names)
+
+# Drop columns with 'Identifier' or '6. Geography' for Domain.
+zip_ahrq_feat_names <- subset(zip_ahrq_feat_names, !(Domain %in% c("Identifier", "6. Geography")))
+print(zip_ahrq_feat_names)
+
+
+```
+# Data Summary: categorical
+```{r}
+
+barchart(zip_ahrq_feat_names$Data_source)
+barchart(zip_ahrq_feat_names$Domain)
+barchart(zip_ahrq_feat_names$SDOH_Topic)
+
+```
+
+# Preprocess AHRQ data:
+```{r}
+
+# Pad ZIP codes with leading 0's: so all are exactly 5 digits.
+zip_ahrq_total$ZIPCODE <- as.integer(zip_ahrq_total$ZIPCODE)
+zip_ahrq_total$ZIPCODE <- sprintf("%05d", zip_ahrq_total$ZIPCODE)
+zip_ahrq_total$ZIPCODE <- as.integer(zip_ahrq_total$ZIPCODE)
+# TODO: if needed, pad ZIP code in patient data with leading zeroes.
+
+# Pad STATEFIPS codes with leading 0's: so all are exactly 2 digits.
+# First, convert to character (instead of <dbl>), then store as string.
+zip_ahrq_total$STATEFIPS <- as.integer(zip_ahrq_total$STATEFIPS)
+zip_ahrq_total$STATEFIPS <- sprintf("%02d", zip_ahrq_total$STATEFIPS)
+zip_ahrq_total$STATEFIPS <- as.integer(zip_ahrq_total$STATEFIPS)
+# TODO: if needed, pad State FIPS code in patient data with leading zeroes.
+
+# Perform any imputation if desired
+# ex.) can impute AHRQ variables at: geographic levels (within state of GA, or entire USA), across time (2011-2020) or one year at a time.
+
+```
+
+
+# Merge AHRQ with patient data (example):
+- Crosswalk variables: use these to merge with patient dataset.
+  - STATEFIPS
+  - ZIPCODE
+  - YEAR
+Example: merge 'df_patients' <- zip_ahrq_total
+```{r}
+
+merged_ahrq_patients <- merge(zip_ahrq_total, df_patients, by.x=c("ZIPCODE", "STATEFIPS", "YEAR"), by.y=c("ZIP_CODE", "STATE_FIPS", "baselineyear"))
+
+head(merged_ahrq_patients)
+
+```
+
+
+# Write merged data to output file:
+```{r}
+
+write.csv(merged_ahrq_patients, file="./merged_zip_ahrq_patients_final.csv", row.names=FALSE) 
+
+```
