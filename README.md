@@ -10,6 +10,21 @@ Load Libraries:
 - tidyr
 - stringr
 
+
+## Folder Structure
+- After downloading Data folder from specified OneDrive:
+.
+├── AHRQ_pipeline
+│   ├── compress_pharma.py
+│   └── merge_AHRQ.Rmd
+└── Data
+    ├── AHRQ
+    │   ├── COUNTY
+    │   ├── TRACT
+    │   └── ZIP
+    └── GA_Pharmacy_Data_gp_fsq
+
+
 ## Summary of functionality: 
 
 ### Load Data:
