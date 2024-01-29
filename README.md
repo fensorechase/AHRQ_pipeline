@@ -13,6 +13,7 @@ Load Libraries:
 
 ## Folder Structure
 - After downloading Data folder from specified OneDrive:
+```
 .
 ├── AHRQ_pipeline
 │   ├── compress_pharma.py
@@ -23,7 +24,7 @@ Load Libraries:
     │   ├── TRACT
     │   └── ZIP
     └── GA_Pharmacy_Data_gp_fsq
-
+```
 
 ## Summary of functionality: 
 
