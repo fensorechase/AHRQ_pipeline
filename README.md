@@ -45,6 +45,7 @@ Merge the Georgia pharmacy location data with patient data using crosswalk varia
 - zipcode
 - can optionally select either 'gp' or 'fsq' as the data source for Georgia pharmacy location data (see gp_zipdata.json, fsq_zipdata.json), or use both sources combined (
 
-## The AHRQ SDOHD data used in this notebook can be accessed from the following link:
+## The raw AHRQ SDOHD data used in this notebook can be accessed from the following link:
 - AHRQ SDOHD: https://www.ahrq.gov/sdoh/data-analytics/sdoh-data.html#download
+(If you have access, we recommend using the OneDrive ZIP code level data because we have already isolated relevant sheets from the csv files at the above link)
 
