@@ -18,6 +18,7 @@ tmp.zipcode = tmp.zipcode.astype(int)
 
 # To select pharmacies from Google Places: 'gp'
 # To select pharmacies from Foursquare: 'fsq'
+# To use pharmacies from both data sources, delete the line used to filter 'source'.
 tmp_gp = tmp[tmp.source == 'fsq']
 
 # Count number of pharmacies per zipcode
