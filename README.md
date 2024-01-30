@@ -1,7 +1,7 @@
 # AHRQ_pipeline
 
-## Key Steps
-Load Libraries:
+## Libraries/Packages
+(R workspace) Load Libraries:
 - caret
 - data.table
 - dplyr
@@ -9,6 +9,10 @@ Load Libraries:
 - scales
 - tidyr
 - stringr
+
+(Python workspace) Load packages:
+- json
+- pandas
 
 
 ## Folder Structure
